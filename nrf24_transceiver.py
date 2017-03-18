@@ -58,7 +58,8 @@ class Transceiver:
 			self.radio.openReadingPipe(1, pipes[1])
 			self.radio.startListening()
 
-
+		#self.radio.printDetails()
+		#print self.radio.get_status()
 	# send message in form of character array
 	def transmit(self, message):
 

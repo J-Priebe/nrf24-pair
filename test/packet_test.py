@@ -50,29 +50,23 @@ def _report():
 	global packet_data
 	global total_invalid_packets
 
-	print('')
-
-	# total packets received from all senders
-	total_packets_received = sum(len(packet_data[key]) for key in packet_data)
-
-	print(str(total_packets_received) + " total valid packets received")
-	print(str(total_invalid_packets) + " total invalid packets received")
-
-	print('')
+	print 'generating report...'
 
 	# remove junk from previous broadcasts on same channel	
-	for k, v in packet_data.items():
+        for k, v in packet_data.items():
 		if len(v) < 3 :
 			print('junk key ' + str(k) + ' deleted')
 			del packet_data[k]
 
 	# report on packets from each individual sender
 	for key in packet_data:
-
+		print('key' + str(key))
 		# number of messages from sender
+		discard = int( len(packet_data[key])/10 )
+		packet_data[key] = packet_data[key][discard:-discard]
 		n = len(packet_data[key])
-
 		# find receival period since pi's are not synchronized
+		# discard the first and last 10% of packets
 		first_arrival_time = float(packet_data[key][0][1])
 		last_arrival_time = float(packet_data[key][-1][1])
 		receive_time = last_arrival_time - first_arrival_time
@@ -94,10 +88,11 @@ def _report():
 			packet_id = int(packet_data[key][i][0])
 			lost = lost + (packet_id - prev_packet_id - 1)
 
-
+		print ('getting stats for key' + str(key))
 		# statistics on interarrival distribution
 		average_interarrival_time = np.mean(interarrival_times)
 		max_interarrival_time = max(interarrival_times)
+		max_index = interarrival_times.index(max_interarrival_time)
 		min_interarrival_time = min(interarrival_times)
 		interarrival_variance = np.var(interarrival_times)
 		ci = st.t.interval(0.9999, len(interarrival_times)-1, loc=np.mean(interarrival_times), scale=st.sem(interarrival_times))
@@ -107,8 +102,16 @@ def _report():
 		# for j in range(0, r):
 		# 	print(interarrival_times[j])
 
+		        # total packets received from all senders
+        	total_packets_received = sum(len(packet_data[key]) for key in packet_data)
+
+        	print(str(total_packets_received) + " total valid packets received")
+        	print(str(total_invalid_packets) + " total invalid packets received")
+
+        	print('')
+
 		print('\n------------- Sender: ' + str(key) + ' -------------')
-		print(str(n) + " messages received")
+		print(str(n) + " messages analyzed")
 		percent = str(float(n) / float(total_packets_received) * 100.0)
 		print(percent + "% of packets")
 		print('estimated packets lost: ' + str( str(lost) + ' ( ' + str( float(lost)/(lost + n) * 100 ) + '%)' ))
@@ -117,12 +120,13 @@ def _report():
 		print('')
 		print('average interarrival time: ') + str(average_interarrival_time)
 		print('max: ' + str(max_interarrival_time))
+		print('packet index of max: ' + str(max_index))
 		print('min: ' + str(min_interarrival_time))
 		print('interarrival variance: ' + str(interarrival_variance))
 
 		print('\n99.99% confidence interval: ' + str(ci))
 		print('------------------------------------------\n')
-
+	print 'report done'
 # thread callbacks
 def on_message_received(msg):
 	arrive_time = time.time()
@@ -145,11 +149,23 @@ if __name__ == "__main__":
 	print('')
 	time.sleep(1)
 	print('Device ID: '+ device_id)
+
+	if transmitter.transceiver.radio.get_status() == 0:
+		print 'Error initializing transmitter. Check your hardware.'
+		sys.exit(0)
+	else:
+		print 'Transmitter OK'
+	if receiver.transceiver.radio.get_status() == 0:
+                print 'Error initializing receiver. Check your hardware.'
+                sys.exit(0)
+	else:
+		print 'Receiver OK'	
+	
 	time.sleep(1)
 	print('broadcast/receive started...')
 
 	t = time.time()
-	end = t + 20
+	end = t + 5
 
 	transmitter.start()
 	receiver.start()
@@ -162,6 +178,9 @@ if __name__ == "__main__":
 	# report on packets collected
 	transmitter.running = False
 	receiver.running = False
+	#transmitter.join()
+	#receiver.join()
+
 	_report()
 
 
