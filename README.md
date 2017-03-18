@@ -11,9 +11,9 @@ This pin configuration is for a Raspberry Pi 3. If you are using an Arduino, che
 ## Shared Pins
 Five pins (MOSI, SCLK, MISO, VCC, GND) are shared by BOTH CHIPS. Connect them via a breadboard, according to the below diagram:
 
-!(http://invent.module143.com/wp-content/uploads/2016/07/nrf24l01_module_pinout-1-768x357.jpg)
+<img src="http://invent.module143.com/wp-content/uploads/2016/07/nrf24l01_module_pinout-1-768x357.jpg" width="400">
 
-!(http://invent.module143.com/wp-content/uploads/2016/07/RFToPiConnections-1.png)
+<img src="http://invent.module143.com/wp-content/uploads/2016/07/RFToPiConnections-1.png" width="400">
 
 source: [tutorial](http://invent.module143.com/daskal_tutorial/rpi-3-tutorial-13-wireless-pi-to-pi-python-communication-with-nrf24l01/)
 
@@ -21,14 +21,16 @@ source: [tutorial](http://invent.module143.com/daskal_tutorial/rpi-3-tutorial-13
 
 ### Chip 1 (Same as diagram)
 ***CSN Pin:*** GPIO 08 / Pin 24
+
 ***CE Pin:*** GPIO 17 / Pin 11
 
 ### Chip 2
-***CSN Pin:*** GPIO 07 / Pin 26
-***CE Pin:*** GPIO 27 / Pin 13
+**CSN Pin:** GPIO 07 / Pin 26
 
+**CE Pin:** GPIO 27 / Pin 13
 
-**Note: the IRQ pin is not used.**
+</br>
+*Note: the IRQ pin is not used.*
 
 
 # Usage
@@ -38,15 +40,17 @@ After following the above setup, download/clone the repository onto your Pi. If 
 Object for initializing radio and sending/receiving messages. initialized in transmit mode (default) or receive mode.
 
 ### TransmitThread and ReceiveThread
-Thread classes for operating a radio in transmit or receive mode. Their callback function is called every time they send or receive a message. A  shared *condition* similar to a thread lock) ensures the transmit and receive threads run equally. See `packet_test.py` for an example of initializing the threads, thread condition, callbacks, etc.
+Thread classes for operating a radio in transmit or receive mode. Their callback function is called every time they send or receive a message. A  shared *condition* (similar to a thread lock) ensures the transmit and receive threads run equally. See `packet_test.py` for an example of initializing the threads, thread condition, callbacks, etc.
 
 
 # Results
-So far this has been tested with two Raspberry Pis. Using a thread condition is the best method I've found in terms of total message volume and even "sharing", i.e., the same proportion of messages are received by each Pi. Here are the results for one and two Pis, respectively:
-
-!(http://i.imgur.com/VYIKPau.png)
-
-!(http://i.imgur.com/YDCK0LY.png)
+So far this has been tested with two Raspberry Pis. Using a thread condition is the best method I've found in terms of total message volume and even "sharing", i.e., the same proportion of messages are received by each Pi. Here are the results for one Pi: 
+</br>
+<img src="http://i.imgur.com/VYIKPau.png" width=400>
+</br>
+Two Pis:
+</br>
+<img src="http://i.imgur.com/YDCK0LY.png" width=400>
 
 The % of messages lost appears proportionate to the number of Pis, which makes sense. Because of the alternating threads, a Pi can receive at most as many messages as it sends. 
 
